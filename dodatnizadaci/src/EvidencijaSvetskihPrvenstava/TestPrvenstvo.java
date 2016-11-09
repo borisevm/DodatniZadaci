@@ -2,6 +2,9 @@ package EvidencijaSvetskihPrvenstava;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +16,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
 import PomocneKlase.DrzavaNameComparator;
 import PomocneKlase.PrvenstvoGodinaComparator;
 import PomocneKlase.PrvenstvoNameComparator;
@@ -22,7 +31,7 @@ public class TestPrvenstvo {
 	
 	public static HashMap<Integer, Drzava> sveDrzave = new HashMap<Integer, Drzava>();
 	public static HashMap<String, SvetskoPrvenstvo> svaPrvenstva = new HashMap<String, SvetskoPrvenstvo>();
-	
+	public static Workbook wb = null;
 	protected static SimpleDateFormat formatter = new SimpleDateFormat("yyyy");
 	
 	public static Drzava pronadjiDrzavu(Integer id) {
@@ -123,6 +132,7 @@ public class TestPrvenstvo {
 			}
 
 		SvetskoPrvenstvo svPrv = new SvetskoPrvenstvo(godina, nazivPrvenstva, drzava);
+		drzava.getSvaSvPrvenstva().add(svPrv);
 		svaPrvenstva.put(godinaTekst, svPrv);		
 	}
 	
@@ -286,6 +296,44 @@ public class TestPrvenstvo {
 		}
 	}
 	
+	public static void statistika() {
+		System.out.println("Unesite pocetnu godinu: ");
+		String godinaOdTekst = PomocnaKlasa.ocitajTekst();		
+		System.out.println("Unesite zavrsnu godinu: ");
+		String godinaDoTekst = PomocnaKlasa.ocitajTekst();
+		Date datumOd = null;
+		Date datumDo = null;
+		try {
+			datumOd = formatter.parse(godinaOdTekst);
+			datumDo = formatter.parse(godinaDoTekst);
+		} catch (ParseException e){
+			e.printStackTrace();
+		}
+		int rbr = 0;
+		int brojac = 0;
+		boolean odgovara = false;
+		for (Drzava drzava : sveDrzave.values()) {
+			if (!drzava.getSvaSvPrvenstva().isEmpty()) {
+				for (int i = 0; i < drzava.getSvaSvPrvenstva().size(); i++) {
+					if ((drzava.getSvaSvPrvenstva().get(i).getGodina().compareTo(datumOd)!=-1) && 
+							(drzava.getSvaSvPrvenstva().get(i).getGodina().compareTo(datumDo)!=1)) {
+						brojac++;
+						odgovara = true;
+					}
+				}
+				if (odgovara) {
+					rbr++;
+					System.out.print(rbr+". " + drzava.getNazivDrzave());
+					if (brojac > 1) {
+						System.out.println(" " + brojac);
+					} else
+						System.out.println();
+					brojac = 0;
+				}
+			}
+		}
+	}
+	
 	public static void ispisiMeni() {
 		System.out.println("*****************************************************");
 		System.out.println("Opcija 1 - prikaz svih drzava");
@@ -296,10 +344,75 @@ public class TestPrvenstvo {
 		System.out.println("Opcija 6 - izmena svetskog prvenstva");
 		System.out.println("Opcija 7 - sortiranje i prikaz svih drzava");
 		System.out.println("Opcija 8 - sortiranje i prikaz svih svetskih prvenstava");
+		System.out.println("Opcija 9 - statistika");
 		System.out.println("-----");
 		System.out.println("Opcija 0 - izlaz iz programa");		
 	}
 
+	public static void ucitavanjePodatakaExcel() {
+
+		try {
+			String sP = System.getProperty("file.separator");
+			FileInputStream in = new FileInputStream("."+sP+"data"+sP+"drzave.xlsx");
+			wb = WorkbookFactory.create(in);
+			Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
+			// prolaz
+			for (Row row : sheet) {
+				// izbegnemo prvu vrstu (zaglavlje)
+				if (row.getRowNum() == 0)
+					continue;
+				Drzava drzava = new Drzava(row);
+				sveDrzave.put(drzava.getIdDrzave(), drzava);
+				
+			}
+			in.close();
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void snimanjePodatakaExcel() {		
+		
+		Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
+		// prolaz kroz sve drzave
+		
+		ArrayList<Drzava> sveDrzaveLista = new ArrayList<Drzava>();
+		for (Drzava drz :  sveDrzave.values()) {
+			sveDrzaveLista.add(drz); 
+		}		
+		for (int i = 0; i < sveDrzaveLista.size(); i++) {
+			Drzava drzava = sveDrzaveLista.get(i);
+			Row row = sheet.getRow(i + 1); // preskocimo prvu vrstu (zaglavlje)
+			// ako dobijemo null, ovo je nov red
+			if (row == null) {
+				row = sheet.createRow(i + 1);
+				// kreiramo celije za podatke
+				//
+				for (int j = 0; j < 4; j++) {
+					row.createCell(j);
+				}
+			}
+			drzava.toExcelFile(row);
+		}
+
+		// snimamo u xlsx
+		FileOutputStream fileOut;
+		try {
+			String sP = System.getProperty("file.separator");
+			fileOut = new FileOutputStream("."+sP+"data"+sP+"drzave.xlsx");
+			wb.write(fileOut);
+			fileOut.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public static void main(String[] args) throws IOException {
 		
 		String sP = System.getProperty("file.separator");		
@@ -345,7 +458,7 @@ public class TestPrvenstvo {
 				ispisiSortiranaPrvenstva();
 				break;
 			case 9:
-				
+				statistika();
 				break;
 			default:
 				System.out.println("Nepostojeca komanda");
@@ -356,6 +469,8 @@ public class TestPrvenstvo {
 		
 		pisiUFajlDrzave(drzaveFajl);
 		pisiUFajlsvaPrvenstva(svetskaPrvenstvaFajl);
+		
+		snimanjePodatakaExcel();
 		System.out.print("Program izvrsen");
 
 	}

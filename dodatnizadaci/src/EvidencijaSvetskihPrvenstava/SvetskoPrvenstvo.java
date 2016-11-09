@@ -36,7 +36,7 @@ public class SvetskoPrvenstvo {
 		drzava = TestPrvenstvo.pronadjiDrzavu(Integer.parseInt(tokeni[2]));
 		
 		//punjenje liste u klasi Drzava
-		drzava.getSvaPrvenstva().add(this);
+		drzava.getSvaSvPrvenstva().add(this);
 	}
 	
 	public String toFileRepresentaton() {

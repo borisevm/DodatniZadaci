@@ -1,15 +1,20 @@
 package EvidencijaSvetskihPrvenstava;
 
 import java.util.ArrayList;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+
 
 public class Drzava {
 	
 	private static int brojacId = 0;
+	private static final int IDX_ID = 0;
+	private static final int IDX_NAZIV = 1;
 	
 	protected int idDrzave;
 	protected String nazivDrzave;
 	
-	protected ArrayList<SvetskoPrvenstvo> svaPrvenstva = new ArrayList<SvetskoPrvenstvo>();
+	protected ArrayList<SvetskoPrvenstvo> svaSvPrvenstva = new ArrayList<SvetskoPrvenstvo>();
 
 	public Drzava(int idDrzave, String nazivDrzave) {
 		if (idDrzave == 0) {
@@ -20,14 +25,14 @@ public class Drzava {
 		this.nazivDrzave = nazivDrzave;
 	}
 
-	public Drzava(int idDrzave, String nazivDrzave, ArrayList<SvetskoPrvenstvo> svaPrvenstva) {
+	public Drzava(int idDrzave, String nazivDrzave, ArrayList<SvetskoPrvenstvo> svaSvPrvenstva) {
 		if (idDrzave == 0) {
 			brojacId++;
 			idDrzave = brojacId;
 		}
 		this.idDrzave = idDrzave;
 		this.nazivDrzave = nazivDrzave;
-		this.svaPrvenstva = svaPrvenstva;
+		this.svaSvPrvenstva = svaSvPrvenstva;
 	}
 	
 	public Drzava(String tekst) {
@@ -43,6 +48,13 @@ public class Drzava {
 			brojacId = idDrzave;
 		}
 	}
+	
+	public Drzava (Row row) {
+		Cell idDrzave = row.getCell(IDX_ID);
+		this.idDrzave = (int) idDrzave.getNumericCellValue();
+		Cell nazivDrzave = row.getCell(IDX_NAZIV);
+		this.nazivDrzave = nazivDrzave.getStringCellValue();
+		}
 	
 	public String toFileRepresentation() {
 		StringBuilder sb = new StringBuilder(idDrzave + "," + nazivDrzave);
@@ -75,6 +87,11 @@ public class Drzava {
 		if (idDrzave != other.idDrzave)
 			return false;
 		return true;
+	}	
+	
+	public void toExcelFile(Row row) {
+		row.getCell(IDX_ID).setCellValue(idDrzave);
+		row.getCell(IDX_NAZIV).setCellValue(nazivDrzave);
 	}
 
 	public int getIdDrzave() {
@@ -93,11 +110,11 @@ public class Drzava {
 		this.nazivDrzave = nazivDrzave;
 	}
 
-	public ArrayList<SvetskoPrvenstvo> getSvaPrvenstva() {
-		return svaPrvenstva;
+	public ArrayList<SvetskoPrvenstvo> getSvaSvPrvenstva() {
+		return svaSvPrvenstva;
 	}
 
-	public void setSvaPrvenstva(ArrayList<SvetskoPrvenstvo> svaPrvenstva) {
-		this.svaPrvenstva = svaPrvenstva;
+	public void setSvaSvPrvenstva(ArrayList<SvetskoPrvenstvo> svaSvPrvenstva) {
+		this.svaSvPrvenstva = svaSvPrvenstva;
 	}
 }
