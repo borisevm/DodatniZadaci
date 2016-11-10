@@ -46,18 +46,20 @@ public class SvetskoPrvenstvo {
 	}
 	
 	public SvetskoPrvenstvo (Row row) {
-		Cell godina = row.getCell(IDX_ID);
+		Cell god = row.getCell(IDX_ID);
 		try {
-		this.godina = (Date) godina.getDateCellValue();
+		this.godina = formatter.parse(god.getStringCellValue());
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		Cell nazivPrvenstva = row.getCell(IDX_NAZIV);
-		this.nazivPrvenstva = nazivPrvenstva.getStringCellValue();
-		Cell drzava = row.getCell(IDX_DRZAVA);
-		this.drzava = TestPrvenstvo.pronadjiDrzavu((int)drzava.getNumericCellValue());
+		}		
+		Cell nazPrvenstva = row.getCell(IDX_NAZIV);
+		this.nazivPrvenstva = nazPrvenstva.getStringCellValue();
+		Cell drz = row.getCell(IDX_DRZAVA);
+		drzava = TestPrvenstvo.pronadjiDrzavu((int)drz.getNumericCellValue());
 		
-		}
+		//punjenje liste u klasi Drzava
+		//drzava.getSvaSvPrvenstva().add(this);
+	}
 	
 	public String toFileRepresentaton() {
 		String godinaTekst = formatter.format(godina);

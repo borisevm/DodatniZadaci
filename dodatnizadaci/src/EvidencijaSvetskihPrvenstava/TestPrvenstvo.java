@@ -23,7 +23,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import PomocneKlase.DrzavaNameComparator;
 import PomocneKlase.PrvenstvoGodinaComparator;
@@ -378,7 +378,7 @@ public class TestPrvenstvo {
 
 	public static void snimanjePodatakaDrzavaExcel() {		
 		
-		//Workbook wb = new XSSFWorkbook();
+		//Workbook wb = new XSSFWorkbook(); //za kreiranje novog fajla
 		//Sheet sheet = wb.createSheet();
 		Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
 		Row row;		
@@ -425,6 +425,7 @@ public class TestPrvenstvo {
 				SvetskoPrvenstvo svPrv = new SvetskoPrvenstvo(row);
 				String godinaTekst = formatter.format(svPrv.getGodina());
 				svaPrvenstva.put(godinaTekst, svPrv);
+				//svPrv.getDrzava().getSvaSvPrvenstva().add(svPrv); //
 				
 			}
 			in.close();
@@ -436,7 +437,8 @@ public class TestPrvenstvo {
 	}
 
 	public static void snimanjePodatakaPrvenstvaExcel() {		
-		
+		//Workbook wb = new XSSFWorkbook(); //za kreiranje novog fajla
+		//Sheet sheet = wb.createSheet();
 		Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
 		Row row;		
 		Set <String> keyid = svaPrvenstva.keySet();
@@ -469,21 +471,12 @@ public class TestPrvenstvo {
 		System.out.println("drzave.xlsx je uspesno zapisan");
 	}	
 	
-	public static void main(String[] args) throws IOException {
-		
-//		String sP = System.getProperty("file.separator");		
-//		File drzaveFajl = new File("."+sP+"data"+sP+"drzave.csv");
-//		citajIzFajlaDrzave(drzaveFajl);
-		ucitavanjePodatakaDrzavaExcel();
-		
-//		File svetskaPrvenstvaFajl = new File("."+sP+"data"+sP+"svetska_prvenstva.csv");
-//		citajIzFajlaSvetskaPrvenstva(svetskaPrvenstvaFajl);		
-		
-		
+	
+	public static void meniAplikacija() {
 		int odluka = -1;
 		while (odluka != 0) {
 			ispisiMeni();
-			System.out.println("Izaberite opciju: ");
+			System.out.println("Izaberite opciju rada aplikacije: ");
 			odluka = PomocnaKlasa.ocitajCeoBroj();
 			switch (odluka) {
 			
@@ -521,13 +514,37 @@ public class TestPrvenstvo {
 				System.out.println("Nepostojeca komanda");
 				break;
 			}
-		}		
+		}
+	}
+	
+	public static void main(String[] args) throws IOException {
 		
-		
-//		pisiUFajlDrzave(drzaveFajl);
-//		pisiUFajlsvaPrvenstva(svetskaPrvenstvaFajl);
-		
-		snimanjePodatakaDrzavaExcel();
+		System.out.println("Izaberite vrstu I/O fajlova - C za csv - X za xlsx");
+		char izbor = PomocnaKlasa.ocitajKarakter();
+
+			switch (izbor) {
+			case 'C':
+				String sP = System.getProperty("file.separator");		
+				File drzaveFajl = new File("."+sP+"data"+sP+"drzave.csv");
+				citajIzFajlaDrzave(drzaveFajl);
+				File svetskaPrvenstvaFajl = new File("."+sP+"data"+sP+"svetska_prvenstva.csv");
+				citajIzFajlaSvetskaPrvenstva(svetskaPrvenstvaFajl);	
+				meniAplikacija();
+				pisiUFajlDrzave(drzaveFajl);
+				pisiUFajlsvaPrvenstva(svetskaPrvenstvaFajl);
+				//snimanjePodatakaPrvenstvaExcel(); //inicijalno kreiranje fajla
+				break;
+			case 'X':
+				ucitavanjePodatakaDrzavaExcel();
+				ucitavanjePodatakaPrvenstvaExcel();
+				meniAplikacija();
+				snimanjePodatakaDrzavaExcel();
+				snimanjePodatakaPrvenstvaExcel();
+				break;
+			default:
+				System.out.println("Nepostojeca komanda");
+				break;		
+		}
 		System.out.print("Program izvrsen");
 
 	}

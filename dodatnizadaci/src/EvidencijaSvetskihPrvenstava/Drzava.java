@@ -10,7 +10,7 @@ public class Drzava {
 	private static int brojacId = 0;
 	private static final int IDX_ID = 0;
 	private static final int IDX_NAZIV = 1;
-//	private static int h = 0;
+	
 	protected int idDrzave;
 	protected String nazivDrzave;
 	
