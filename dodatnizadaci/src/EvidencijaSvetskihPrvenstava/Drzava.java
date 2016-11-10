@@ -54,7 +54,11 @@ public class Drzava {
 		this.idDrzave = (int) idDrzave.getNumericCellValue();
 		Cell nazivDrzave = row.getCell(IDX_NAZIV);
 		this.nazivDrzave = nazivDrzave.getStringCellValue();
+		
+		if (brojacId < this.idDrzave) {
+			brojacId = this.idDrzave;
 		}
+	}
 	
 	public String toFileRepresentation() {
 		StringBuilder sb = new StringBuilder(idDrzave + "," + nazivDrzave);
@@ -88,6 +92,11 @@ public class Drzava {
 			return false;
 		return true;
 	}	
+	
+	public static void toExcelFileHeader(Row row) {
+		row.getCell(IDX_ID).setCellValue("idDrzave");
+		row.getCell(IDX_NAZIV).setCellValue("nazivDrzave");
+	}
 	
 	public void toExcelFile(Row row) {
 		row.getCell(IDX_ID).setCellValue(idDrzave);

@@ -4,6 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+
 
 public class SvetskoPrvenstvo {
 	
@@ -12,6 +15,9 @@ public class SvetskoPrvenstvo {
 	protected Drzava drzava;
 	
 	protected static SimpleDateFormat formatter = new SimpleDateFormat("yyyy");
+	private static final int IDX_ID = 0;
+	private static final int IDX_NAZIV = 1;
+	private static final int IDX_DRZAVA = 2;
 	
 	public SvetskoPrvenstvo(Date godina, String nazivPrvenstva, Drzava drzava) {
 		this.godina = godina;
@@ -38,6 +44,20 @@ public class SvetskoPrvenstvo {
 		//punjenje liste u klasi Drzava
 		drzava.getSvaSvPrvenstva().add(this);
 	}
+	
+	public SvetskoPrvenstvo (Row row) {
+		Cell godina = row.getCell(IDX_ID);
+		try {
+		this.godina = (Date) godina.getDateCellValue();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Cell nazivPrvenstva = row.getCell(IDX_NAZIV);
+		this.nazivPrvenstva = nazivPrvenstva.getStringCellValue();
+		Cell drzava = row.getCell(IDX_DRZAVA);
+		this.drzava = TestPrvenstvo.pronadjiDrzavu((int)drzava.getNumericCellValue());
+		
+		}
 	
 	public String toFileRepresentaton() {
 		String godinaTekst = formatter.format(godina);
@@ -81,6 +101,12 @@ public class SvetskoPrvenstvo {
 		} else if (!godina.equals(other.godina))
 			return false;
 		return true;
+	}
+	
+	public static void toExcelFileHeader(Row row) {
+		row.getCell(IDX_ID).setCellValue("godina");
+		row.getCell(IDX_NAZIV).setCellValue("nazivPrvenstva");
+		row.getCell(IDX_DRZAVA).setCellValue("Drzava");
 	}
 
 	public Date getGodina() {
