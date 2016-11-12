@@ -58,7 +58,8 @@ public class SvetskoPrvenstvo {
 		drzava = TestPrvenstvo.pronadjiDrzavu((int)drz.getNumericCellValue());
 		
 		//punjenje liste u klasi Drzava
-		//drzava.getSvaSvPrvenstva().add(this);
+		drzava.getSvaSvPrvenstva().add(this);
+
 	}
 	
 	public String toFileRepresentaton() {

@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import PomocneKlase.DrzavaNameComparator;
+import PomocneKlase.PrvenstvoComparator;
 import PomocneKlase.PrvenstvoGodinaComparator;
 import PomocneKlase.PrvenstvoNameComparator;
 import rs.ac.uns.ftn.informatika.dosk.java.vezbe05.primer05.utils.PomocnaKlasa;
@@ -84,7 +85,7 @@ public class TestPrvenstvo {
 	}
 	
 	public static void ispisiSortiranaPrvenstva() {
-		for (SvetskoPrvenstvo svPrv : sortirajSvetskaPrvenstva()) {
+		for (SvetskoPrvenstvo svPrv : sortirajSvetskaPrvenstva2()) {
 			System.out.println(svPrv);
 		}
 	}
@@ -358,7 +359,7 @@ public class TestPrvenstvo {
 			String sP = System.getProperty("file.separator");
 			FileInputStream in = new FileInputStream("."+sP+"data"+sP+"drzave.xlsx");
 			wb = WorkbookFactory.create(in);
-			Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
+			Sheet sheet = wb.getSheetAt(0);
 			// prolaz
 			for (Row row : sheet) {
 				// izbegnemo prvu vrstu (zaglavlje)
@@ -377,23 +378,23 @@ public class TestPrvenstvo {
 	}
 
 	public static void snimanjePodatakaDrzavaExcel() {		
-		
-		//Workbook wb = new XSSFWorkbook(); //za kreiranje novog fajla
-		//Sheet sheet = wb.createSheet();
 		Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
 		Row row;		
 		Set <Integer> keyid = sveDrzave.keySet();
-		int rowid = 0;			
+		int rowid = 1;			
+		sheet.createRow(0);
+		sheet.getRow(0).createCell(0);
+		sheet.getRow(0).createCell(1);
+		Drzava.toExcelFileHeader(sheet.getRow(0));
 		for (Integer key : keyid) {
 			Drzava  drzava = sveDrzave.get(key);			
 			row = sheet.createRow(rowid++);			
-			int cellid = 0;
+			int cellid = 0;			
 			Cell cell = row.createCell(cellid++);
 			cell.setCellValue((Integer)drzava.getIdDrzave());
 			cell = row.createCell(cellid++);
-			cell.setCellValue((String)drzava.getNazivDrzave());			
+			cell.setCellValue((String)drzava.getNazivDrzave());	
 		}
-		Drzava.toExcelFileHeader(sheet.getRow(0));
 		
 		FileOutputStream fileOut;
 		try {
@@ -418,15 +419,12 @@ public class TestPrvenstvo {
 			wb = WorkbookFactory.create(in);
 			Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
 			// prolaz
-			for (Row row : sheet) {
-				// izbegnemo prvu vrstu (zaglavlje)
+			for (Row row : sheet) {				
 				if (row.getRowNum() == 0)
 					continue;
 				SvetskoPrvenstvo svPrv = new SvetskoPrvenstvo(row);
 				String godinaTekst = formatter.format(svPrv.getGodina());
-				svaPrvenstva.put(godinaTekst, svPrv);
-				//svPrv.getDrzava().getSvaSvPrvenstva().add(svPrv); //
-				
+				svaPrvenstva.put(godinaTekst, svPrv);				
 			}
 			in.close();
 		} catch (InvalidFormatException e) {
@@ -437,12 +435,15 @@ public class TestPrvenstvo {
 	}
 
 	public static void snimanjePodatakaPrvenstvaExcel() {		
-		//Workbook wb = new XSSFWorkbook(); //za kreiranje novog fajla
-		//Sheet sheet = wb.createSheet();
 		Sheet sheet = wb.getSheetAt(0); // wb.getSheet("Sheet1")
 		Row row;		
 		Set <String> keyid = svaPrvenstva.keySet();
-		int rowid = 0;			
+		int rowid = 1;		
+		sheet.createRow(0);
+		sheet.getRow(0).createCell(0);
+		sheet.getRow(0).createCell(1);
+		sheet.getRow(0).createCell(2);
+		SvetskoPrvenstvo.toExcelFileHeader(sheet.getRow(0)); //Ispisivanje zaglavlja
 		for (String key : keyid) {
 			SvetskoPrvenstvo  svPrv = svaPrvenstva.get(key);			
 			row = sheet.createRow(rowid++);			
@@ -454,8 +455,7 @@ public class TestPrvenstvo {
 			cell.setCellValue((String)svPrv.getNazivPrvenstva());	
 			cell = row.createCell(cellid++);
 			cell.setCellValue((Integer)svPrv.getDrzava().getIdDrzave());			
-		}
-		SvetskoPrvenstvo.toExcelFileHeader(sheet.getRow(0));
+		}			
 		
 		FileOutputStream fileOut;
 		try {
@@ -468,7 +468,7 @@ public class TestPrvenstvo {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("drzave.xlsx je uspesno zapisan");
+		System.out.println("svetska_prvenstva.xlsx je uspesno zapisan");
 	}	
 	
 	
@@ -519,10 +519,15 @@ public class TestPrvenstvo {
 	
 	public static void main(String[] args) throws IOException {
 		
-		System.out.println("Izaberite vrstu I/O fajlova - C za csv - X za xlsx");
-		char izbor = PomocnaKlasa.ocitajKarakter();
-
+		System.out.println("Izaberite vrstu I/O fajlova - C za csv - E za xlsx - X za izlaz");
+		
+		char izbor = ' ';
+		while (izbor != 'X') {
+			izbor = PomocnaKlasa.ocitajKarakter();
 			switch (izbor) {
+			case 'X':
+				System.out.println("kraj programa");
+				break;
 			case 'C':
 				String sP = System.getProperty("file.separator");		
 				File drzaveFajl = new File("."+sP+"data"+sP+"drzave.csv");
@@ -531,10 +536,9 @@ public class TestPrvenstvo {
 				citajIzFajlaSvetskaPrvenstva(svetskaPrvenstvaFajl);	
 				meniAplikacija();
 				pisiUFajlDrzave(drzaveFajl);
-				pisiUFajlsvaPrvenstva(svetskaPrvenstvaFajl);
-				//snimanjePodatakaPrvenstvaExcel(); //inicijalno kreiranje fajla
+				pisiUFajlsvaPrvenstva(svetskaPrvenstvaFajl);				
 				break;
-			case 'X':
+			case 'E':
 				ucitavanjePodatakaDrzavaExcel();
 				ucitavanjePodatakaPrvenstvaExcel();
 				meniAplikacija();
@@ -544,9 +548,29 @@ public class TestPrvenstvo {
 			default:
 				System.out.println("Nepostojeca komanda");
 				break;		
+			}
 		}
 		System.out.print("Program izvrsen");
 
+	}
+	
+	public static ArrayList<SvetskoPrvenstvo> sortirajSvetskaPrvenstva2() {
+		ArrayList<SvetskoPrvenstvo> sortiranaPrvenstva = new ArrayList<>(svaPrvenstva.values());
+		System.out.println("Unesite kriteriju sortiranja: \n\t1 za sortiranje po nazivu  \n\t2 za sortiranje po godini");
+		int redosled = PomocnaKlasa.ocitajCeoBroj();
+		switch (redosled) {
+		
+		case 1:
+			Collections.sort(sortiranaPrvenstva, new PrvenstvoComparator(1, "naziv"));
+			break;
+		case 2:
+			Collections.sort(sortiranaPrvenstva, new PrvenstvoComparator(1, "godina"));			
+			break;
+		default: 
+			System.out.println("Opcije su 1 ili 2");
+			break;
+		}
+		return sortiranaPrvenstva;		
 	}
 }
 
